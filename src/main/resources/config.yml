@@ -1,0 +1,6 @@
+guestString: "Guest_"
+randomNumbersLength: 6
+cacheSaveInterval: 1200
+notifyGuests: true
+guestMessage: "§eWARNING: You are not logged in to Xbox account. Playing as guest."
+notificationDelay: 300
