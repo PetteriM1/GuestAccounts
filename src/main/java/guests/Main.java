@@ -1,58 +1,52 @@
 package guests;
 
-import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;
-import cn.nukkit.utils.Config;
 
 import java.util.HashMap;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Main extends PluginBase {
 
-    public HashMap accountCache;
-    public Config config;
+    HashMap accountCache;
     private Stream stream;
+    String guestString;
+    private int randomNumbersLength;
+    boolean notifyGuests;
+    String guestMessage;
 
+    @Override
     public void onEnable() {
-        saveDefaultConfig();
-        config = getConfig();
-        getServer().getPluginManager().registerEvents(new Listener(this), this);
+        initConfig();
         initAccountCache();
+        getServer().getPluginManager().registerEvents(new Listener(this), this);
     }
 
-    public void onDisable() {
-        stream.save();
+    private void initConfig() {
+        saveDefaultConfig();
+        guestString = getConfig().getString("guestString", "Guest_");
+        randomNumbersLength = getConfig().getInt("randomNumbersLength", 6);
+        notifyGuests = getConfig().getBoolean("notifyGuests");
+        guestMessage = getConfig().getString("guestMessage");
     }
 
     private void initAccountCache() {
         stream = new Stream(this);
         stream.init();
-
-        getServer().getScheduler().scheduleRepeatingTask(new cn.nukkit.scheduler.Task() {
-            @Override
-            public void onRun(int i) {
-                stream.save();
-            }
-        }, config.getInt("cacheSaveInterval"), true);
+        getServer().getScheduler().scheduleRepeatingTask(this, () -> stream.save(), getConfig().getInt("cacheSaveInterval"));
     }
 
-    public String randomNumbers() {
-        String numbers = "0123456789";
+    @Override
+    public void onDisable() {
+        stream.save();
+    }
+
+    private static final String NUMBERS = "0123456789";
+
+    String randomNumbers() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < config.getInt("randomNumbersLength"); ++i) {
-            sb.append(numbers.charAt(new Random().nextInt(numbers.length())));
+        for (int i = 0; i < randomNumbersLength; ++i) {
+            sb.append(NUMBERS.charAt(ThreadLocalRandom.current().nextInt(NUMBERS.length())));
         }
         return sb.toString();
-    }
-
-    public void scheduleXblWarning(Player p) {
-        getServer().getScheduler().scheduleDelayedTask(new cn.nukkit.scheduler.Task() {
-            @Override
-            public void onRun(int i) {
-                if (p.isOnline()) {
-                    p.sendMessage(config.getString("guestMessage"));
-                }
-            }
-        }, config.getInt("notificationDelay"), true);
     }
 }

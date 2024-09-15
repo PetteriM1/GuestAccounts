@@ -1,11 +1,13 @@
 package guests;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class Stream {
 
-    private Main plugin;
+    private final Main plugin;
 
     public Stream(Main plugin) {
         this.plugin = plugin;
@@ -27,7 +29,7 @@ public class Stream {
 
     public void save() {
         try {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(plugin.getDataFolder() + "/accountCache.dat"));
+            ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(Paths.get(plugin.getDataFolder() + "/accountCache.dat")));
             oos.writeObject(plugin.accountCache);
             oos.close();
         } catch (IOException e) {
